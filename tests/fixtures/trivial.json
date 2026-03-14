@@ -1,0 +1,65 @@
+{
+  "name": "trivial",
+  "description": "2 nodes, 1 edge, 20x20 empty grid — sanity check",
+  "input": {
+    "graph": {
+      "nodes": [
+        {
+          "id": 0,
+          "radius": 1
+        },
+        {
+          "id": 1,
+          "radius": 1
+        }
+      ],
+      "edges": [
+        {
+          "id": 0,
+          "src": 0,
+          "dst": 1,
+          "weight": 1.0
+        }
+      ]
+    },
+    "space": {
+      "width": 20,
+      "height": 20,
+      "obstacles": []
+    },
+    "config": {
+      "beta": 2.0,
+      "seed": 42,
+      "repulsion_k": 50.0
+    }
+  },
+  "expected": {
+    "positions": {
+      "0": {
+        "x": 9,
+        "y": 4
+      },
+      "1": {
+        "x": 11,
+        "y": 4
+      }
+    },
+    "paths": {
+      "0": [
+        {
+          "x": 11,
+          "y": 4
+        },
+        {
+          "x": 10,
+          "y": 4
+        },
+        {
+          "x": 9,
+          "y": 4
+        }
+      ]
+    },
+    "score": 0.75
+  }
+}
