@@ -13,113 +13,158 @@
 //! committed irrevocably. β controls the exploration/exploitation
 //! tradeoff — the "optimization level" of the output.
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use rand::SeedableRng;
 use rand_chacha::ChaCha8Rng;
 
+use rayon::prelude::*;
+
 use crate::graph::{Graph, OgunConfig, Space};
-use crate::grid::Grid;
 use crate::layout::Layout;
 use crate::placement::{boltzmann_sample, Candidate};
-use crate::potential::utility;
-use crate::routing::lee_route;
+use crate::potential::{utility, PlacedSoa};
+use crate::routing::{lee_route, RouteBuf};
 use crate::scoring::score;
-use crate::types::Pos;
+use crate::types::{NodeId, Pos};
 
 /// Generate a spatial layout from a graph and spatial domain.
 ///
 /// Deterministic: same `graph` + `space` + `config` (including seed) = same output.
 pub fn generate(graph: &Graph, space: &Space, config: &OgunConfig) -> Layout {
     let mut rng = ChaCha8Rng::seed_from_u64(config.seed);
-    let mut positions = HashMap::new();
+    let mut positions: Vec<Option<Pos>> = vec![None; graph.nodes.len()];
     let mut paths = HashMap::new();
+    let adj = graph.adjacency();
+    let w = space.width;
+    let h = space.height;
 
     // Track which grid cells are blocked (by node footprints or routed paths).
-    let mut blocked: Grid<bool> = Grid::new(space.width, space.height, false);
+    let mut blocked = vec![false; (w * h) as usize];
 
     // Mark obstacle cells as blocked.
-    for pos in blocked.positions() {
-        if space.is_obstacle(pos) {
-            blocked.set(pos.x, pos.y, true);
+    for y in 0..h {
+        for x in 0..w {
+            if space.is_obstacle(Pos::new(x, y)) {
+                blocked[(y * w + x) as usize] = true;
+            }
         }
     }
 
+    // Pre-allocate reusable buffers.
+    let mut candidates: Vec<Candidate> = Vec::with_capacity((w * h) as usize);
+    let mut route_buf = RouteBuf::new(w, h);
+    let mut placed_soa = PlacedSoa::new(graph.nodes.len());
+
+    // Pre-build per-node adjacency (without EdgeId) for utility.
+    let node_adjs: Vec<Vec<(NodeId, f32)>> = adj
+        .iter()
+        .map(|edges| edges.iter().map(|&(_, nb, wt)| (nb, wt)).collect())
+        .collect();
+
     // --- MAIN LOOP: process each agent in order ---
     for node in &graph.nodes {
-        // EVAL_UTILITY: score every valid position.
-        let candidates: Vec<Candidate> = blocked
-            .positions()
-            .into_iter()
-            .filter_map(|pos| {
-                utility(node.id, pos, &positions, graph, space, config)
-                    .map(|u| Candidate { pos, utility: u })
-            })
-            .collect();
+        let nid = node.id.0 as usize;
+        let node_radius = node.radius as f32;
+
+        // EVAL_UTILITY: score every position.
+        // Use rayon for large grids, sequential for small ones.
+        let node_adj = &node_adjs[nid];
+        let positions_ref = &positions;
+        let placed_ref = &placed_soa;
+        let grid_size = (w * h) as usize;
+        if grid_size * placed_soa.count >= 500_000 {
+            candidates = (0..h)
+                .into_par_iter()
+                .flat_map(|y| {
+                    (0..w).into_par_iter().filter_map(move |x| {
+                        let pos = Pos::new(x, y);
+                        utility(pos, node_radius, placed_ref, node_adj, positions_ref, space, config)
+                            .map(|u| Candidate { pos, utility: u })
+                    })
+                })
+                .collect();
+        } else {
+            candidates.clear();
+            for y in 0..h {
+                for x in 0..w {
+                    let pos = Pos::new(x, y);
+                    if let Some(u) = utility(
+                        pos, node_radius, placed_ref, node_adj, positions_ref, space, config,
+                    ) {
+                        candidates.push(Candidate { pos, utility: u });
+                    }
+                }
+            }
+        }
 
         // CHOOSE_BOLTZMANN: sample a position.
         let chosen = match boltzmann_sample(&candidates, config.beta, &mut rng) {
             Some(pos) => pos,
-            None => continue, // no valid position — skip this agent
+            None => continue,
         };
 
         // COMMIT_IRREVOCABLE: place the node and block its footprint.
-        positions.insert(node.id, chosen);
-        mark_footprint(&mut blocked, chosen, node.radius);
+        positions[nid] = Some(chosen);
+        placed_soa.push(chosen, node.radius);
+        mark_footprint(&mut blocked, w, chosen, node.radius);
 
         // ROUTE: connect to already-placed neighbors via Lee BFS.
-        let placed_set: HashSet<_> = positions.keys().copied().collect();
-        for edge in graph.edges_of(node.id) {
-            let neighbor_id = graph.neighbor(edge, node.id);
-            if !placed_set.contains(&neighbor_id) {
-                continue; // neighbor not placed yet — route later
+        for &(edge_id, neighbor_id, _) in &adj[nid] {
+            if positions[neighbor_id.0 as usize].is_none() {
+                continue;
             }
             let src = chosen;
-            let dst = positions[&neighbor_id];
+            let dst = positions[neighbor_id.0 as usize].unwrap();
 
-            // Allow routing through the footprints of the two endpoint nodes.
             let src_r = node.radius as f32;
             let dst_r = graph.nodes[neighbor_id.0 as usize].radius as f32;
             let blocked_ref = &blocked;
-            let path = lee_route(space.width, space.height, src, dst, |p| {
-                if !blocked_ref.get_pos(p).copied().unwrap_or(true) {
-                    return true; // not blocked at all
+            let path = lee_route(w, h, src, dst, |p| {
+                if !blocked_ref[(p.y * w + p.x) as usize] {
+                    return true;
                 }
-                // Allow cells within either endpoint's footprint.
                 let in_src = p.dist_sq(src) <= src_r * src_r;
                 let in_dst = p.dist_sq(dst) <= dst_r * dst_r;
                 in_src || in_dst
-            });
+            }, &mut route_buf);
 
             if let Some(path) = path {
-                // Mark path cells as blocked for future routing.
                 for &p in &path {
-                    blocked.set(p.x, p.y, true);
+                    blocked[(p.y * w + p.x) as usize] = true;
                 }
-                paths.insert(edge.id, path);
+                paths.insert(edge_id, path);
             }
         }
     }
 
     // SCORE the completed layout.
-    let s = score(&positions, &paths, graph, space);
+    let pos_map: HashMap<NodeId, Pos> = positions
+        .iter()
+        .enumerate()
+        .filter_map(|(i, p)| p.map(|pos| (NodeId(i as u32), pos)))
+        .collect();
+    let s = score(&pos_map, &paths, graph, space);
 
     Layout {
-        positions,
+        positions: pos_map,
         paths,
         score: s,
     }
 }
 
 /// Block grid cells within a node's footprint (square approximation).
-fn mark_footprint(blocked: &mut Grid<bool>, center: Pos, radius: u32) {
+fn mark_footprint(blocked: &mut [bool], w: u32, center: Pos, radius: u32) {
     let r = radius as i32;
     for dy in -r..=r {
         for dx in -r..=r {
             let nx = center.x as i32 + dx;
             let ny = center.y as i32 + dy;
-            if nx >= 0 && ny >= 0 {
-                blocked.set(nx as u32, ny as u32, true);
+            if nx >= 0 && ny >= 0 && (nx as u32) < w {
+                let idx = ny as u32 * w + nx as u32;
+                if (idx as usize) < blocked.len() {
+                    blocked[idx as usize] = true;
+                }
             }
         }
     }

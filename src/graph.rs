@@ -44,6 +44,17 @@ impl Graph {
             edge.src
         }
     }
+
+    /// Pre-built adjacency list: `adj[node.0]` = vec of `(EdgeId, neighbor_id, weight)`.
+    /// Preserves edge iteration order for determinism.
+    pub fn adjacency(&self) -> Vec<Vec<(EdgeId, NodeId, f32)>> {
+        let mut adj = vec![Vec::new(); self.nodes.len()];
+        for e in &self.edges {
+            adj[e.src.0 as usize].push((e.id, e.dst, e.weight));
+            adj[e.dst.0 as usize].push((e.id, e.src, e.weight));
+        }
+        adj
+    }
 }
 
 /// An axis-aligned rectangle used for obstacles and keep-out zones.

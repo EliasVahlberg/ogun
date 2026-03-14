@@ -33,19 +33,19 @@ pub fn boltzmann_sample<R: Rng>(
         .map(|c| c.utility)
         .fold(f32::NEG_INFINITY, f32::max);
 
-    let weights: Vec<f32> = candidates
+    // Two-pass sampling without allocating a weights Vec:
+    // Pass 1: compute total weight.
+    let total: f32 = candidates
         .iter()
         .map(|c| ((c.utility - max_u) * beta).exp())
-        .collect();
+        .sum();
 
-    let total: f32 = weights.iter().sum();
-
-    // Inverse CDF sampling.
+    // Pass 2: inverse CDF sampling.
     let mut r = rng.random::<f32>() * total;
-    for (i, &w) in weights.iter().enumerate() {
-        r -= w;
+    for c in candidates {
+        r -= ((c.utility - max_u) * beta).exp();
         if r <= 0.0 {
-            return Some(candidates[i].pos);
+            return Some(c.pos);
         }
     }
 
