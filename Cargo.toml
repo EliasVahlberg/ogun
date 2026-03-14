@@ -8,7 +8,7 @@ description = "Spatial layout generation via sequential logit dynamics on potent
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/EliasVahlberg/ogun"
-keywords = ["procedural-generation", "layout", "game-theory", "potential-game"]
+keywords = ["procgen", "layout", "game-theory", "potential-game", "spatial"]
 categories = ["algorithms", "game-development", "simulation"]
 
 [package.metadata.docs.rs]
