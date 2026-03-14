@@ -18,11 +18,7 @@ pub struct Candidate {
 /// Sample a position from candidates using Boltzmann distribution.
 ///
 /// Returns `None` if `candidates` is empty.
-pub fn boltzmann_sample<R: Rng>(
-    candidates: &[Candidate],
-    beta: f32,
-    rng: &mut R,
-) -> Option<Pos> {
+pub fn boltzmann_sample<R: Rng>(candidates: &[Candidate], beta: f32, rng: &mut R) -> Option<Pos> {
     if candidates.is_empty() {
         return None;
     }

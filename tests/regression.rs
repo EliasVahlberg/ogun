@@ -23,14 +23,10 @@ struct FixtureInput {
 }
 
 fn load_fixture(name: &str) -> Fixture {
-    let path = format!(
-        "{}/tests/fixtures/{name}.json",
-        env!("CARGO_MANIFEST_DIR")
-    );
-    let json = std::fs::read_to_string(&path)
-        .unwrap_or_else(|e| panic!("failed to read {path}: {e}"));
-    serde_json::from_str(&json)
-        .unwrap_or_else(|e| panic!("failed to parse {path}: {e}"))
+    let path = format!("{}/tests/fixtures/{name}.json", env!("CARGO_MANIFEST_DIR"));
+    let json =
+        std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("failed to read {path}: {e}"));
+    serde_json::from_str(&json).unwrap_or_else(|e| panic!("failed to parse {path}: {e}"))
 }
 
 fn check_fixture(name: &str) {

@@ -22,9 +22,9 @@ use rayon::prelude::*;
 
 use crate::graph::{Graph, OgunConfig, Space};
 use crate::layout::Layout;
-use crate::placement::{boltzmann_sample, Candidate};
-use crate::potential::{utility, PlacedSoa};
-use crate::routing::{lee_route, RouteBuf};
+use crate::placement::{Candidate, boltzmann_sample};
+use crate::potential::{PlacedSoa, utility};
+use crate::routing::{RouteBuf, lee_route};
 use crate::scoring::score;
 use crate::types::{NodeId, Pos};
 
@@ -79,8 +79,16 @@ pub fn generate(graph: &Graph, space: &Space, config: &OgunConfig) -> Layout {
                 .flat_map(|y| {
                     (0..w).into_par_iter().filter_map(move |x| {
                         let pos = Pos::new(x, y);
-                        utility(pos, node_radius, placed_ref, node_adj, positions_ref, space, config)
-                            .map(|u| Candidate { pos, utility: u })
+                        utility(
+                            pos,
+                            node_radius,
+                            placed_ref,
+                            node_adj,
+                            positions_ref,
+                            space,
+                            config,
+                        )
+                        .map(|u| Candidate { pos, utility: u })
                     })
                 })
                 .collect();
@@ -90,7 +98,13 @@ pub fn generate(graph: &Graph, space: &Space, config: &OgunConfig) -> Layout {
                 for x in 0..w {
                     let pos = Pos::new(x, y);
                     if let Some(u) = utility(
-                        pos, node_radius, placed_ref, node_adj, positions_ref, space, config,
+                        pos,
+                        node_radius,
+                        placed_ref,
+                        node_adj,
+                        positions_ref,
+                        space,
+                        config,
                     ) {
                         candidates.push(Candidate { pos, utility: u });
                     }
@@ -120,14 +134,21 @@ pub fn generate(graph: &Graph, space: &Space, config: &OgunConfig) -> Layout {
             let src_r = node.radius as f32;
             let dst_r = graph.nodes[neighbor_id.0 as usize].radius as f32;
             let blocked_ref = &blocked;
-            let path = lee_route(w, h, src, dst, |p| {
-                if !blocked_ref[(p.y * w + p.x) as usize] {
-                    return true;
-                }
-                let in_src = p.dist_sq(src) <= src_r * src_r;
-                let in_dst = p.dist_sq(dst) <= dst_r * dst_r;
-                in_src || in_dst
-            }, &mut route_buf);
+            let path = lee_route(
+                w,
+                h,
+                src,
+                dst,
+                |p| {
+                    if !blocked_ref[(p.y * w + p.x) as usize] {
+                        return true;
+                    }
+                    let in_src = p.dist_sq(src) <= src_r * src_r;
+                    let in_dst = p.dist_sq(dst) <= dst_r * dst_r;
+                    in_src || in_dst
+                },
+                &mut route_buf,
+            );
 
             if let Some(path) = path {
                 for &p in &path {

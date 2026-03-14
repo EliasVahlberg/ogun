@@ -38,11 +38,7 @@ impl Graph {
 
     /// The other endpoint of an edge relative to `node`.
     pub fn neighbor(&self, edge: &Edge, node: NodeId) -> NodeId {
-        if edge.src == node {
-            edge.dst
-        } else {
-            edge.src
-        }
+        if edge.src == node { edge.dst } else { edge.src }
     }
 
     /// Pre-built adjacency list: `adj[node.0]` = vec of `(EdgeId, neighbor_id, weight)`.
@@ -68,10 +64,7 @@ pub struct Rect {
 
 impl Rect {
     pub fn contains(&self, pos: Pos) -> bool {
-        pos.x >= self.x
-            && pos.x < self.x + self.w
-            && pos.y >= self.y
-            && pos.y < self.y + self.h
+        pos.x >= self.x && pos.x < self.x + self.w && pos.y >= self.y && pos.y < self.y + self.h
     }
 }
 

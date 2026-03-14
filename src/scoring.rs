@@ -58,7 +58,11 @@ fn accessibility(paths: &HashMap<EdgeId, Vec<Pos>>, graph: &Graph) -> f32 {
     if graph.edges.is_empty() {
         return 1.0;
     }
-    let routed = graph.edges.iter().filter(|e| paths.contains_key(&e.id)).count();
+    let routed = graph
+        .edges
+        .iter()
+        .filter(|e| paths.contains_key(&e.id))
+        .count();
     routed as f32 / graph.edges.len() as f32
 }
 
@@ -77,7 +81,13 @@ fn congestion(paths: &HashMap<EdgeId, Vec<Pos>>, space: &Space) -> f32 {
         }
     }
     // Max overlap across all cells.
-    let max_overlap = usage.positions().into_iter().filter_map(|p| usage.get(p.x, p.y)).max().copied().unwrap_or(0);
+    let max_overlap = usage
+        .positions()
+        .into_iter()
+        .filter_map(|p| usage.get(p.x, p.y))
+        .max()
+        .copied()
+        .unwrap_or(0);
     if max_overlap <= 1 {
         1.0
     } else {
@@ -119,7 +129,11 @@ fn void_ratio(
         }
     }
 
-    let used = occupied.positions().into_iter().filter(|p| occupied.get(p.x, p.y) == Some(&true)).count() as f32;
+    let used = occupied
+        .positions()
+        .into_iter()
+        .filter(|p| occupied.get(p.x, p.y) == Some(&true))
+        .count() as f32;
     let ratio: f32 = 1.0 - (used / total);
 
     // Ideal void ratio ~0.2. Score drops as we deviate.

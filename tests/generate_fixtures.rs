@@ -31,8 +31,14 @@ fn scenarios() -> Vec<(String, String, Graph, Space, OgunConfig)> {
             "2 nodes, 1 edge, 20x20 empty grid — sanity check".into(),
             Graph {
                 nodes: vec![
-                    Node { id: NodeId(0), radius: 1 },
-                    Node { id: NodeId(1), radius: 1 },
+                    Node {
+                        id: NodeId(0),
+                        radius: 1,
+                    },
+                    Node {
+                        id: NodeId(1),
+                        radius: 1,
+                    },
                 ],
                 edges: vec![Edge {
                     id: EdgeId(0),
@@ -41,61 +47,154 @@ fn scenarios() -> Vec<(String, String, Graph, Space, OgunConfig)> {
                     weight: 1.0,
                 }],
             },
-            Space { width: 20, height: 20, obstacles: vec![] },
-            OgunConfig { beta: 2.0, seed: 42, repulsion_k: 50.0 },
+            Space {
+                width: 20,
+                height: 20,
+                obstacles: vec![],
+            },
+            OgunConfig {
+                beta: 2.0,
+                seed: 42,
+                repulsion_k: 50.0,
+            },
         ),
         (
             "small_cluster".into(),
             "5 nodes, 6 edges, 30x30 grid — basic clustering behavior".into(),
             Graph {
                 nodes: vec![
-                    Node { id: NodeId(0), radius: 1 },
-                    Node { id: NodeId(1), radius: 1 },
-                    Node { id: NodeId(2), radius: 1 },
-                    Node { id: NodeId(3), radius: 1 },
-                    Node { id: NodeId(4), radius: 2 },
+                    Node {
+                        id: NodeId(0),
+                        radius: 1,
+                    },
+                    Node {
+                        id: NodeId(1),
+                        radius: 1,
+                    },
+                    Node {
+                        id: NodeId(2),
+                        radius: 1,
+                    },
+                    Node {
+                        id: NodeId(3),
+                        radius: 1,
+                    },
+                    Node {
+                        id: NodeId(4),
+                        radius: 2,
+                    },
                 ],
                 edges: vec![
-                    Edge { id: EdgeId(0), src: NodeId(0), dst: NodeId(1), weight: 1.0 },
-                    Edge { id: EdgeId(1), src: NodeId(1), dst: NodeId(2), weight: 1.0 },
-                    Edge { id: EdgeId(2), src: NodeId(2), dst: NodeId(3), weight: 1.0 },
-                    Edge { id: EdgeId(3), src: NodeId(3), dst: NodeId(0), weight: 0.5 },
-                    Edge { id: EdgeId(4), src: NodeId(4), dst: NodeId(0), weight: 2.0 },
-                    Edge { id: EdgeId(5), src: NodeId(4), dst: NodeId(2), weight: 2.0 },
+                    Edge {
+                        id: EdgeId(0),
+                        src: NodeId(0),
+                        dst: NodeId(1),
+                        weight: 1.0,
+                    },
+                    Edge {
+                        id: EdgeId(1),
+                        src: NodeId(1),
+                        dst: NodeId(2),
+                        weight: 1.0,
+                    },
+                    Edge {
+                        id: EdgeId(2),
+                        src: NodeId(2),
+                        dst: NodeId(3),
+                        weight: 1.0,
+                    },
+                    Edge {
+                        id: EdgeId(3),
+                        src: NodeId(3),
+                        dst: NodeId(0),
+                        weight: 0.5,
+                    },
+                    Edge {
+                        id: EdgeId(4),
+                        src: NodeId(4),
+                        dst: NodeId(0),
+                        weight: 2.0,
+                    },
+                    Edge {
+                        id: EdgeId(5),
+                        src: NodeId(4),
+                        dst: NodeId(2),
+                        weight: 2.0,
+                    },
                 ],
             },
-            Space { width: 30, height: 30, obstacles: vec![] },
-            OgunConfig { beta: 2.0, seed: 100, repulsion_k: 50.0 },
+            Space {
+                width: 30,
+                height: 30,
+                obstacles: vec![],
+            },
+            OgunConfig {
+                beta: 2.0,
+                seed: 100,
+                repulsion_k: 50.0,
+            },
         ),
         (
             "with_obstacles".into(),
-            "3 nodes, 2 edges, 25x25 grid with obstacle wall — tests routing around obstacles".into(),
+            "3 nodes, 2 edges, 25x25 grid with obstacle wall — tests routing around obstacles"
+                .into(),
             Graph {
                 nodes: vec![
-                    Node { id: NodeId(0), radius: 1 },
-                    Node { id: NodeId(1), radius: 1 },
-                    Node { id: NodeId(2), radius: 1 },
+                    Node {
+                        id: NodeId(0),
+                        radius: 1,
+                    },
+                    Node {
+                        id: NodeId(1),
+                        radius: 1,
+                    },
+                    Node {
+                        id: NodeId(2),
+                        radius: 1,
+                    },
                 ],
                 edges: vec![
-                    Edge { id: EdgeId(0), src: NodeId(0), dst: NodeId(1), weight: 1.0 },
-                    Edge { id: EdgeId(1), src: NodeId(1), dst: NodeId(2), weight: 1.0 },
+                    Edge {
+                        id: EdgeId(0),
+                        src: NodeId(0),
+                        dst: NodeId(1),
+                        weight: 1.0,
+                    },
+                    Edge {
+                        id: EdgeId(1),
+                        src: NodeId(1),
+                        dst: NodeId(2),
+                        weight: 1.0,
+                    },
                 ],
             },
             Space {
                 width: 25,
                 height: 25,
                 obstacles: vec![
-                    Rect { x: 10, y: 0, w: 2, h: 20 }, // vertical wall with gap at bottom
+                    Rect {
+                        x: 10,
+                        y: 0,
+                        w: 2,
+                        h: 20,
+                    }, // vertical wall with gap at bottom
                 ],
             },
-            OgunConfig { beta: 3.0, seed: 77, repulsion_k: 50.0 },
+            OgunConfig {
+                beta: 3.0,
+                seed: 77,
+                repulsion_k: 50.0,
+            },
         ),
         (
             "linear_chain".into(),
             "6 nodes in a chain, 40x20 grid — tests sequential attraction along a line".into(),
             Graph {
                 nodes: (0..6)
-                    .map(|i| Node { id: NodeId(i), radius: 1 })
+                    .map(|i| Node {
+                        id: NodeId(i),
+                        radius: 1,
+                    })
                     .collect(),
                 edges: (0..5)
                     .map(|i| Edge {
@@ -106,48 +205,136 @@ fn scenarios() -> Vec<(String, String, Graph, Space, OgunConfig)> {
                     })
                     .collect(),
             },
-            Space { width: 40, height: 20, obstacles: vec![] },
-            OgunConfig { beta: 2.0, seed: 55, repulsion_k: 30.0 },
+            Space {
+                width: 40,
+                height: 20,
+                obstacles: vec![],
+            },
+            OgunConfig {
+                beta: 2.0,
+                seed: 55,
+                repulsion_k: 30.0,
+            },
         ),
         (
             "high_beta".into(),
             "4 nodes, 4 edges, β=10 — near-greedy deterministic placement".into(),
             Graph {
                 nodes: vec![
-                    Node { id: NodeId(0), radius: 1 },
-                    Node { id: NodeId(1), radius: 1 },
-                    Node { id: NodeId(2), radius: 1 },
-                    Node { id: NodeId(3), radius: 1 },
+                    Node {
+                        id: NodeId(0),
+                        radius: 1,
+                    },
+                    Node {
+                        id: NodeId(1),
+                        radius: 1,
+                    },
+                    Node {
+                        id: NodeId(2),
+                        radius: 1,
+                    },
+                    Node {
+                        id: NodeId(3),
+                        radius: 1,
+                    },
                 ],
                 edges: vec![
-                    Edge { id: EdgeId(0), src: NodeId(0), dst: NodeId(1), weight: 1.0 },
-                    Edge { id: EdgeId(1), src: NodeId(1), dst: NodeId(2), weight: 1.0 },
-                    Edge { id: EdgeId(2), src: NodeId(2), dst: NodeId(3), weight: 1.0 },
-                    Edge { id: EdgeId(3), src: NodeId(3), dst: NodeId(0), weight: 1.0 },
+                    Edge {
+                        id: EdgeId(0),
+                        src: NodeId(0),
+                        dst: NodeId(1),
+                        weight: 1.0,
+                    },
+                    Edge {
+                        id: EdgeId(1),
+                        src: NodeId(1),
+                        dst: NodeId(2),
+                        weight: 1.0,
+                    },
+                    Edge {
+                        id: EdgeId(2),
+                        src: NodeId(2),
+                        dst: NodeId(3),
+                        weight: 1.0,
+                    },
+                    Edge {
+                        id: EdgeId(3),
+                        src: NodeId(3),
+                        dst: NodeId(0),
+                        weight: 1.0,
+                    },
                 ],
             },
-            Space { width: 30, height: 30, obstacles: vec![] },
-            OgunConfig { beta: 10.0, seed: 42, repulsion_k: 50.0 },
+            Space {
+                width: 30,
+                height: 30,
+                obstacles: vec![],
+            },
+            OgunConfig {
+                beta: 10.0,
+                seed: 42,
+                repulsion_k: 50.0,
+            },
         ),
         (
             "low_beta".into(),
             "4 nodes, 4 edges, β=0.1 — near-random exploratory placement".into(),
             Graph {
                 nodes: vec![
-                    Node { id: NodeId(0), radius: 1 },
-                    Node { id: NodeId(1), radius: 1 },
-                    Node { id: NodeId(2), radius: 1 },
-                    Node { id: NodeId(3), radius: 1 },
+                    Node {
+                        id: NodeId(0),
+                        radius: 1,
+                    },
+                    Node {
+                        id: NodeId(1),
+                        radius: 1,
+                    },
+                    Node {
+                        id: NodeId(2),
+                        radius: 1,
+                    },
+                    Node {
+                        id: NodeId(3),
+                        radius: 1,
+                    },
                 ],
                 edges: vec![
-                    Edge { id: EdgeId(0), src: NodeId(0), dst: NodeId(1), weight: 1.0 },
-                    Edge { id: EdgeId(1), src: NodeId(1), dst: NodeId(2), weight: 1.0 },
-                    Edge { id: EdgeId(2), src: NodeId(2), dst: NodeId(3), weight: 1.0 },
-                    Edge { id: EdgeId(3), src: NodeId(3), dst: NodeId(0), weight: 1.0 },
+                    Edge {
+                        id: EdgeId(0),
+                        src: NodeId(0),
+                        dst: NodeId(1),
+                        weight: 1.0,
+                    },
+                    Edge {
+                        id: EdgeId(1),
+                        src: NodeId(1),
+                        dst: NodeId(2),
+                        weight: 1.0,
+                    },
+                    Edge {
+                        id: EdgeId(2),
+                        src: NodeId(2),
+                        dst: NodeId(3),
+                        weight: 1.0,
+                    },
+                    Edge {
+                        id: EdgeId(3),
+                        src: NodeId(3),
+                        dst: NodeId(0),
+                        weight: 1.0,
+                    },
                 ],
             },
-            Space { width: 30, height: 30, obstacles: vec![] },
-            OgunConfig { beta: 0.1, seed: 42, repulsion_k: 50.0 },
+            Space {
+                width: 30,
+                height: 30,
+                obstacles: vec![],
+            },
+            OgunConfig {
+                beta: 0.1,
+                seed: 42,
+                repulsion_k: 50.0,
+            },
         ),
     ]
 }

@@ -5,9 +5,9 @@
 //! These are `#[ignore]`d so they don't slow down `cargo test`.
 
 use ogun::*;
+use rand::Rng;
 use rand::SeedableRng;
 use rand_chacha::ChaCha8Rng;
-use rand::Rng;
 use std::time::Instant;
 
 /// Build a reproducible graph with `n` nodes, ~`edges_per_node` edges on average,
@@ -64,7 +64,11 @@ fn build_scenario(
 
     (
         Graph { nodes, edges },
-        Space { width: w, height: h, obstacles },
+        Space {
+            width: w,
+            height: h,
+            obstacles,
+        },
     )
 }
 
@@ -90,7 +94,11 @@ fn run_perf(label: &str, graph: &Graph, space: &Space, config: &OgunConfig) {
 #[ignore]
 fn perf_medium_50n_100x100() {
     let (graph, space) = build_scenario(50, 2, 100, 100, 10, 1000);
-    let config = OgunConfig { beta: 2.0, seed: 42, repulsion_k: 50.0 };
+    let config = OgunConfig {
+        beta: 2.0,
+        seed: 42,
+        repulsion_k: 50.0,
+    };
     run_perf("medium 50n 100x100 β=2", &graph, &space, &config);
 }
 
@@ -100,7 +108,11 @@ fn perf_medium_50n_100x100() {
 #[ignore]
 fn perf_large_200n_250x250() {
     let (graph, space) = build_scenario(200, 3, 250, 250, 30, 2000);
-    let config = OgunConfig { beta: 2.0, seed: 42, repulsion_k: 50.0 };
+    let config = OgunConfig {
+        beta: 2.0,
+        seed: 42,
+        repulsion_k: 50.0,
+    };
     run_perf("large 200n 250x250 β=2", &graph, &space, &config);
 }
 
@@ -110,7 +122,11 @@ fn perf_large_200n_250x250() {
 #[ignore]
 fn perf_saltglass_100n_250x110() {
     let (graph, space) = build_scenario(100, 3, 250, 110, 15, 3000);
-    let config = OgunConfig { beta: 2.0, seed: 42, repulsion_k: 50.0 };
+    let config = OgunConfig {
+        beta: 2.0,
+        seed: 42,
+        repulsion_k: 50.0,
+    };
     run_perf("saltglass 100n 250x110 β=2", &graph, &space, &config);
 }
 
@@ -120,7 +136,11 @@ fn perf_saltglass_100n_250x110() {
 #[ignore]
 fn perf_stress_500n_500x500() {
     let (graph, space) = build_scenario(500, 3, 500, 500, 50, 4000);
-    let config = OgunConfig { beta: 2.0, seed: 42, repulsion_k: 50.0 };
+    let config = OgunConfig {
+        beta: 2.0,
+        seed: 42,
+        repulsion_k: 50.0,
+    };
     run_perf("stress 500n 500x500 β=2", &graph, &space, &config);
 }
 
@@ -132,8 +152,17 @@ fn perf_beta_sweep() {
     let (graph, space) = build_scenario(100, 3, 200, 200, 20, 5000);
     println!();
     for &beta in &[0.1, 1.0, 2.0, 5.0, 10.0, 50.0] {
-        let config = OgunConfig { beta, seed: 42, repulsion_k: 50.0 };
-        run_perf(&format!("beta_sweep 100n 200x200 β={beta}"), &graph, &space, &config);
+        let config = OgunConfig {
+            beta,
+            seed: 42,
+            repulsion_k: 50.0,
+        };
+        run_perf(
+            &format!("beta_sweep 100n 200x200 β={beta}"),
+            &graph,
+            &space,
+            &config,
+        );
     }
 }
 
@@ -143,7 +172,11 @@ fn perf_beta_sweep() {
 #[ignore]
 fn perf_dense_100n_6edges() {
     let (graph, space) = build_scenario(100, 6, 200, 200, 15, 6000);
-    let config = OgunConfig { beta: 2.0, seed: 42, repulsion_k: 50.0 };
+    let config = OgunConfig {
+        beta: 2.0,
+        seed: 42,
+        repulsion_k: 50.0,
+    };
     run_perf("dense 100n 6e/n 200x200", &graph, &space, &config);
 }
 
@@ -153,6 +186,10 @@ fn perf_dense_100n_6edges() {
 #[ignore]
 fn perf_obstacle_heavy() {
     let (graph, space) = build_scenario(100, 3, 200, 200, 100, 7000);
-    let config = OgunConfig { beta: 2.0, seed: 42, repulsion_k: 50.0 };
+    let config = OgunConfig {
+        beta: 2.0,
+        seed: 42,
+        repulsion_k: 50.0,
+    };
     run_perf("obstacle-heavy 100n 200x200", &graph, &space, &config);
 }
