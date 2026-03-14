@@ -2,12 +2,18 @@
 name = "ogun"
 version = "0.1.0"
 edition = "2024"
+rust-version = "1.85"
 authors = ["Elias Vahlberg"]
 description = "Spatial layout generation via sequential logit dynamics on potential games"
 license = "MIT"
+readme = "README.md"
 repository = "https://github.com/EliasVahlberg/ogun"
 keywords = ["procedural-generation", "layout", "game-theory", "potential-game"]
 categories = ["algorithms", "game-development", "simulation"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
 rand = "0.9"
