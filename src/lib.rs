@@ -34,7 +34,7 @@
 //!         weight: 1.0,
 //!     }],
 //! };
-//! let space = Space { width: 20, height: 20, obstacles: vec![] };
+//! let space = Space { width: 20, height: 20, obstacles: vec![], routing_costs: None };
 //! let config = OgunConfig { seed: 42, ..OgunConfig::default() };
 //!
 //! let layout = generate(&graph, &space, &config);
@@ -53,7 +53,7 @@ mod types;
 
 // Public API: input types, output type, and the generate function.
 pub use generate::generate;
-pub use graph::{Edge, Graph, Node, OgunConfig, Rect, Space};
+pub use graph::{Edge, Graph, Node, OgunConfig, PotentialKernel, Rect, Space};
 pub use grid::Grid;
 pub use layout::Layout;
 pub use scoring::ScoreBreakdown;

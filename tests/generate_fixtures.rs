@@ -51,6 +51,7 @@ fn scenarios() -> Vec<(String, String, Graph, Space, OgunConfig)> {
                 width: 20,
                 height: 20,
                 obstacles: vec![],
+                routing_costs: None,
             },
             OgunConfig {
                 beta: 2.0,
@@ -128,6 +129,7 @@ fn scenarios() -> Vec<(String, String, Graph, Space, OgunConfig)> {
                 width: 30,
                 height: 30,
                 obstacles: vec![],
+                routing_costs: None,
             },
             OgunConfig {
                 beta: 2.0,
@@ -181,6 +183,7 @@ fn scenarios() -> Vec<(String, String, Graph, Space, OgunConfig)> {
                         h: 20,
                     }, // vertical wall with gap at bottom
                 ],
+                routing_costs: None,
             },
             OgunConfig {
                 beta: 3.0,
@@ -212,6 +215,7 @@ fn scenarios() -> Vec<(String, String, Graph, Space, OgunConfig)> {
                 width: 40,
                 height: 20,
                 obstacles: vec![],
+                routing_costs: None,
             },
             OgunConfig {
                 beta: 2.0,
@@ -273,6 +277,7 @@ fn scenarios() -> Vec<(String, String, Graph, Space, OgunConfig)> {
                 width: 30,
                 height: 30,
                 obstacles: vec![],
+                routing_costs: None,
             },
             OgunConfig {
                 beta: 10.0,
@@ -334,6 +339,7 @@ fn scenarios() -> Vec<(String, String, Graph, Space, OgunConfig)> {
                 width: 30,
                 height: 30,
                 obstacles: vec![],
+                routing_costs: None,
             },
             OgunConfig {
                 beta: 0.1,

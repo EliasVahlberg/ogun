@@ -16,7 +16,7 @@ routes paths through uncharted space.
 
 ```toml
 [dependencies]
-ogun = "0.2"
+ogun = "0.3"
 ```
 
 ## Example
@@ -36,7 +36,7 @@ let graph = Graph {
         weight: 1.0,
     }],
 };
-let space = Space { width: 20, height: 20, obstacles: vec![] };
+let space = Space { width: 20, height: 20, obstacles: vec![], routing_costs: None };
 let config = OgunConfig { seed: 42, ..OgunConfig::default() };
 
 let layout = generate(&graph, &space, &config);

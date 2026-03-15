@@ -2,6 +2,7 @@
 
 use std::collections::HashMap;
 
+use crate::grid::Grid;
 use crate::types::{EdgeId, NodeId, Pos};
 use serde::{Deserialize, Serialize};
 
@@ -76,6 +77,10 @@ pub struct Space {
     pub width: u32,
     pub height: u32,
     pub obstacles: Vec<Rect>,
+    /// Per-cell routing cost multiplier. Default (None) = uniform cost 1.0.
+    /// Values > 1.0 make routing more expensive. 0.0 = free (preferred corridor).
+    #[serde(default)]
+    pub routing_costs: Option<Grid<f32>>,
 }
 
 impl Space {
@@ -83,6 +88,22 @@ impl Space {
     pub fn is_obstacle(&self, pos: Pos) -> bool {
         self.obstacles.iter().any(|r| r.contains(pos))
     }
+}
+
+/// Additional potential terms evaluated during placement.
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct PotentialKernel {
+    /// Per-node preference for grid boundary proximity.
+    /// Positive = prefer edges, negative = prefer center.
+    /// Evaluated as: `affinity * (1.0 - dist_to_nearest_edge / max_dist)`.
+    #[serde(default)]
+    pub boundary_affinity: HashMap<NodeId, f32>,
+
+    /// Per-cell bonus/penalty added directly to utility score.
+    /// Use for terrain compatibility, zoning, preferred placement zones.
+    /// Dimensions must match Space if provided.
+    #[serde(default)]
+    pub cell_bonus: Option<Grid<f32>>,
 }
 
 /// Algorithm parameters.
@@ -106,6 +127,9 @@ pub struct OgunConfig {
     /// History cost increment for congested cells per iteration.
     #[serde(default = "default_history_increment")]
     pub history_increment: f32,
+    /// Additional potential terms for placement scoring.
+    #[serde(default)]
+    pub kernel: PotentialKernel,
 }
 
 fn default_negotiation_iterations() -> u32 {
@@ -124,6 +148,7 @@ impl Default for OgunConfig {
             repulsion_pairs: HashMap::new(),
             negotiation_iterations: 3,
             history_increment: 1.0,
+            kernel: PotentialKernel::default(),
         }
     }
 }

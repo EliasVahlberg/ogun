@@ -140,11 +140,15 @@ impl CongestionState {
         (p.y * self.width + p.x) as usize
     }
 
-    /// PathFinder cost: (base + history) * (1 + sharing)
+    /// PathFinder cost: routing_cost * (base + history) * (1 + sharing)
     #[inline]
-    fn cost(&self, p: Pos) -> f32 {
+    fn cost(&self, p: Pos, routing_costs: Option<&[f32]>) -> f32 {
         let i = self.idx(p);
-        (1.0 + self.history[i]) * (1 + self.sharing[i]) as f32
+        let base = match routing_costs {
+            Some(rc) => rc[i],
+            None => 1.0,
+        };
+        base * (1.0 + self.history[i]) * (1 + self.sharing[i]) as f32
     }
 
     /// Add a path to the sharing grid.
@@ -223,6 +227,7 @@ impl Ord for DijkEntry {
 /// Congestion-aware Dijkstra routing.
 ///
 /// Returns `(path, total_cost)` or `None` if unreachable.
+#[allow(clippy::too_many_arguments)]
 pub fn negotiate_route(
     grid_w: u32,
     grid_h: u32,
@@ -231,6 +236,7 @@ pub fn negotiate_route(
     passable: impl Fn(Pos) -> bool,
     congestion: &CongestionState,
     buf: &mut DijkBuf,
+    routing_costs: Option<&[f32]>,
 ) -> Option<(Vec<Pos>, f32)> {
     if src == dst {
         return Some((vec![src], 0.0));
@@ -268,7 +274,7 @@ pub fn negotiate_route(
             if nb != dst && !passable(nb) {
                 continue;
             }
-            let edge_cost = congestion.cost(nb);
+            let edge_cost = congestion.cost(nb, routing_costs);
             let new_cost = cost + edge_cost;
             let ni = idx(nb);
             if new_cost < buf.dist[ni] {

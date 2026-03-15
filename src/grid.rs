@@ -1,12 +1,15 @@
 //! Flat 2D grid backed by a `Vec<T>`.
 
+use serde::{Deserialize, Serialize};
+
 use crate::types::Pos;
 
 /// 4-connected neighbor offsets (N, E, S, W).
 const DIRS_4: [(i32, i32); 4] = [(0, -1), (1, 0), (0, 1), (-1, 0)];
 
 /// A 2D grid stored as a flat `Vec<T>` in row-major order.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(bound = "T: Serialize + for<'a> Deserialize<'a>")]
 pub struct Grid<T> {
     pub width: u32,
     pub height: u32,

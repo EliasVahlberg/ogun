@@ -55,6 +55,7 @@ fn test_space() -> Space {
         width: 30,
         height: 30,
         obstacles: vec![],
+        routing_costs: None,
     }
 }
 
@@ -171,6 +172,7 @@ fn obstacles_respected() {
             w: 20,
             h: 18,
         }],
+        routing_costs: None,
     };
     let config = OgunConfig {
         beta: 0.0,

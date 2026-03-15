@@ -38,6 +38,34 @@ pub fn generate(graph: &Graph, space: &Space, config: &OgunConfig) -> Layout {
     let h = space.height;
     let sz = (w * h) as usize;
 
+    // Validate kernel dimensions.
+    if let Some(ref bonus) = config.kernel.cell_bonus {
+        assert!(
+            bonus.width == space.width && bonus.height == space.height,
+            "cell_bonus dimensions ({}×{}) must match Space ({}×{})",
+            bonus.width,
+            bonus.height,
+            space.width,
+            space.height,
+        );
+    }
+
+    // Extract flat routing cost slice (if provided).
+    let routing_cost_cells: Option<Vec<f32>> = space.routing_costs.as_ref().map(|g| {
+        assert!(
+            g.width == space.width && g.height == space.height,
+            "routing_costs dimensions ({}×{}) must match Space ({}×{})",
+            g.width,
+            g.height,
+            space.width,
+            space.height,
+        );
+        (0..h)
+            .flat_map(|y| (0..w).map(move |x| *g.get(x, y).unwrap()))
+            .collect()
+    });
+    let rc_slice = routing_cost_cells.as_deref();
+
     // Track which grid cells are blocked (by node footprints or routed paths).
     let mut blocked = vec![false; sz];
     for y in 0..h {
@@ -97,6 +125,7 @@ pub fn generate(graph: &Graph, space: &Space, config: &OgunConfig) -> Layout {
                         let pos = Pos::new(x, y);
                         utility(
                             pos,
+                            node.id,
                             node_radius,
                             placed_ref,
                             node_adj,
@@ -104,6 +133,7 @@ pub fn generate(graph: &Graph, space: &Space, config: &OgunConfig) -> Layout {
                             space,
                             config,
                             rep_mults_ref,
+                            &config.kernel,
                         )
                         .map(|u| Candidate { pos, utility: u })
                     })
@@ -116,6 +146,7 @@ pub fn generate(graph: &Graph, space: &Space, config: &OgunConfig) -> Layout {
                     let pos = Pos::new(x, y);
                     if let Some(u) = utility(
                         pos,
+                        node.id,
                         node_radius,
                         placed_ref,
                         node_adj,
@@ -123,6 +154,7 @@ pub fn generate(graph: &Graph, space: &Space, config: &OgunConfig) -> Layout {
                         space,
                         config,
                         rep_mults_ref,
+                        &config.kernel,
                     ) {
                         candidates.push(Candidate { pos, utility: u });
                     }
@@ -165,7 +197,16 @@ pub fn generate(graph: &Graph, space: &Space, config: &OgunConfig) -> Layout {
                 in_src || in_dst
             };
 
-            let result = negotiate_route(w, h, src, dst, passable, &congestion, &mut dijk_buf);
+            let result = negotiate_route(
+                w,
+                h,
+                src,
+                dst,
+                passable,
+                &congestion,
+                &mut dijk_buf,
+                rc_slice,
+            );
 
             if let Some((path, cost)) = result {
                 for &p in &path {
@@ -214,9 +255,16 @@ pub fn generate(graph: &Graph, space: &Space, config: &OgunConfig) -> Layout {
                 };
 
                 // Reroute
-                if let Some((new_path, cost)) =
-                    negotiate_route(w, h, src, dst, passable, &congestion, &mut dijk_buf)
-                {
+                if let Some((new_path, cost)) = negotiate_route(
+                    w,
+                    h,
+                    src,
+                    dst,
+                    passable,
+                    &congestion,
+                    &mut dijk_buf,
+                    rc_slice,
+                ) {
                     congestion.add_path(&new_path);
                     paths.insert(eid, new_path);
                     route_costs.insert(eid, cost);

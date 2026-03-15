@@ -42,7 +42,8 @@
           "w": 2,
           "h": 20
         }
-      ]
+      ],
+      "routing_costs": null
     },
     "config": {
       "beta": 3.0,
@@ -50,7 +51,11 @@
       "repulsion_k": 50.0,
       "repulsion_pairs": {},
       "negotiation_iterations": 3,
-      "history_increment": 1.0
+      "history_increment": 1.0,
+      "kernel": {
+        "boundary_affinity": {},
+        "cell_bonus": null
+      }
     }
   },
   "expected": {
@@ -69,20 +74,6 @@
       }
     },
     "paths": {
-      "0": [
-        {
-          "x": 5,
-          "y": 11
-        },
-        {
-          "x": 4,
-          "y": 11
-        },
-        {
-          "x": 3,
-          "y": 11
-        }
-      ],
       "1": [
         {
           "x": 3,
@@ -99,6 +90,20 @@
         {
           "x": 4,
           "y": 13
+        }
+      ],
+      "0": [
+        {
+          "x": 5,
+          "y": 11
+        },
+        {
+          "x": 4,
+          "y": 11
+        },
+        {
+          "x": 3,
+          "y": 11
         }
       ]
     },
@@ -748,8 +753,8 @@
     },
     "node_congestion": {
       "0": 7.0,
-      "1": 5.0,
-      "2": 3.0
+      "2": 3.0,
+      "1": 5.0
     }
   }
 }

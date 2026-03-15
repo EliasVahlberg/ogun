@@ -7,7 +7,7 @@
 //!
 //! Higher utility = better position for this agent.
 
-use crate::graph::{OgunConfig, Space};
+use crate::graph::{OgunConfig, PotentialKernel, Space};
 use crate::types::{NodeId, Pos};
 
 /// SoA (struct-of-arrays) layout for placed nodes.
@@ -44,6 +44,7 @@ impl PlacedSoa {
 #[allow(clippy::too_many_arguments)]
 pub fn utility(
     pos: Pos,
+    node_id: NodeId,
     node_radius: f32,
     placed: &PlacedSoa,
     adj: &[(NodeId, f32)],
@@ -51,6 +52,7 @@ pub fn utility(
     space: &Space,
     config: &OgunConfig,
     repulsion_mults: &[f32],
+    kernel: &PotentialKernel,
 ) -> Option<f32> {
     // Invalid: out of bounds or on an obstacle
     if pos.x >= space.width || pos.y >= space.height || space.is_obstacle(pos) {
@@ -89,6 +91,22 @@ pub fn utility(
         if let Some(neighbor_pos) = positions[neighbor.0 as usize] {
             let dist = pos.dist_sq(neighbor_pos).sqrt();
             score -= weight * dist;
+        }
+    }
+
+    // Kernel: boundary affinity.
+    if let Some(&affinity) = kernel.boundary_affinity.get(&node_id) {
+        let dx = px.min(space.width as f32 - 1.0 - px);
+        let dy = py.min(space.height as f32 - 1.0 - py);
+        let dist_to_edge = dx.min(dy);
+        let max_dist = (space.width.min(space.height) as f32) / 2.0;
+        score += affinity * (1.0 - dist_to_edge / max_dist);
+    }
+
+    // Kernel: cell bonus.
+    if let Some(ref bonus) = kernel.cell_bonus {
+        if let Some(&b) = bonus.get_pos(pos) {
+            score += b;
         }
     }
 

@@ -29,3 +29,10 @@ pub struct Layout {
     /// Per-node congestion: average route cost across this node's routed edges.
     pub node_congestion: HashMap<NodeId, f32>,
 }
+
+impl Layout {
+    /// Returns true if all nodes were placed and all edges were routed.
+    pub fn is_complete(&self) -> bool {
+        self.unplaced.is_empty()
+    }
+}

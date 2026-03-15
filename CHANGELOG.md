@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-03-15
+
+### Added
+
+- `PotentialKernel` — configurable potential terms on `OgunConfig`:
+  - `boundary_affinity: HashMap<NodeId, f32>` — per-node preference for grid
+    boundary proximity (positive = prefer edges, negative = prefer center)
+  - `cell_bonus: Option<Grid<f32>>` — per-cell bonus/penalty added to utility
+    score for terrain compatibility, zoning, or preferred placement zones
+- Weighted routing costs — `routing_costs: Option<Grid<f32>>` on `Space`.
+  Multiplies base cost before congestion: `routing_cost × (1 + history) × (1 + sharing)`
+- `Layout::is_complete()` — convenience method returning true if all nodes placed
+- `Serialize`/`Deserialize` derives on `Grid<T>`
+
+### Changed
+
+- `Space` gains `routing_costs` field (default `None` = uniform cost 1.0)
+- `OgunConfig` gains `kernel` field (default = no extra terms)
+- `utility()` accepts `node_id` and `kernel` parameters (internal)
+
 ## [0.2.0] - 2026-03-15
 
 ### Added
@@ -45,5 +65,6 @@ Initial release.
 - Rayon parallel utility evaluation (adaptive threshold)
 - Serde serialization for all public types
 
+[0.3.0]: https://github.com/EliasVahlberg/ogun/releases/tag/v0.3.0
 [0.2.0]: https://github.com/EliasVahlberg/ogun/releases/tag/v0.2.0
 [0.1.0]: https://github.com/EliasVahlberg/ogun/releases/tag/v0.1.0

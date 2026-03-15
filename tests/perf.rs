@@ -68,6 +68,7 @@ fn build_scenario(
             width: w,
             height: h,
             obstacles,
+            routing_costs: None,
         },
     )
 }
