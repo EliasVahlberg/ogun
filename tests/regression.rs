@@ -47,7 +47,7 @@ fn check_fixture(name: &str) {
     );
     assert_eq!(
         actual.score, fixture.expected.score,
-        "[{name}] score differs: got {} expected {}",
+        "[{name}] score differs: got {:?} expected {:?}",
         actual.score, fixture.expected.score
     );
 }

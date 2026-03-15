@@ -8,24 +8,46 @@
 
 use std::collections::HashMap;
 
+use serde::{Deserialize, Serialize};
+
 use crate::graph::{Graph, Space};
 use crate::grid::Grid;
 use crate::types::{EdgeId, NodeId, Pos};
 
-/// Compute the composite optimization score in [0, 1].
+/// Per-metric breakdown of the composite layout score.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct ScoreBreakdown {
+    /// How close routed paths are to optimal length. 1.0 = perfect.
+    pub path_efficiency: f32,
+    /// Fraction of edges that were successfully routed.
+    pub accessibility: f32,
+    /// Inverse of max overlap density. 1.0 = no shared cells.
+    pub congestion: f32,
+    /// Penalizes deviation from ~20% empty space. 1.0 = ideal.
+    pub void_ratio: f32,
+    /// Equal-weight average of the four metrics.
+    pub composite: f32,
+}
+
+/// Compute the score breakdown for a completed layout.
 pub fn score(
     positions: &HashMap<NodeId, Pos>,
     paths: &HashMap<EdgeId, Vec<Pos>>,
     graph: &Graph,
     space: &Space,
-) -> f32 {
-    let efficiency = path_efficiency(positions, paths, graph);
-    let access = accessibility(paths, graph);
+) -> ScoreBreakdown {
+    let pe = path_efficiency(positions, paths, graph);
+    let acc = accessibility(paths, graph);
     let cong = congestion(paths, space);
-    let void_r = void_ratio(positions, paths, graph, space);
+    let vr = void_ratio(positions, paths, graph, space);
 
-    // Equal-weight average of four metrics.
-    (efficiency + access + cong + void_r) / 4.0
+    ScoreBreakdown {
+        path_efficiency: pe,
+        accessibility: acc,
+        congestion: cong,
+        void_ratio: vr,
+        composite: (pe + acc + cong + vr) / 4.0,
+    }
 }
 
 /// Average (manhattan_distance / actual_path_length) over routed edges.

@@ -41,6 +41,7 @@ impl PlacedSoa {
 ///
 /// Returns `None` if the position is invalid (obstacle, out of bounds, or
 /// overlapping an already-placed node's footprint).
+#[allow(clippy::too_many_arguments)]
 pub fn utility(
     pos: Pos,
     node_radius: f32,
@@ -49,6 +50,7 @@ pub fn utility(
     positions: &[Option<Pos>],
     space: &Space,
     config: &OgunConfig,
+    repulsion_mults: &[f32],
 ) -> Option<f32> {
     // Invalid: out of bounds or on an obstacle
     if pos.x >= space.width || pos.y >= space.height || space.is_obstacle(pos) {
@@ -64,6 +66,7 @@ pub fn utility(
     let cutoff_sq = config.repulsion_k * 100.0;
 
     // Fused overlap check + repulsion over SoA arrays.
+    #[allow(clippy::needless_range_loop)]
     for j in 0..placed.count {
         let dx = px - placed.xs[j];
         let dy = py - placed.ys[j];
@@ -77,7 +80,7 @@ pub fn utility(
 
         // Repulsion (skip negligible distant contributions)
         if dist_sq < cutoff_sq {
-            score += config.repulsion_k / dist_sq.max(1.0);
+            score += config.repulsion_k * repulsion_mults[j] / dist_sq.max(1.0);
         }
     }
 

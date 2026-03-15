@@ -38,7 +38,7 @@
 //! let config = OgunConfig { seed: 42, ..OgunConfig::default() };
 //!
 //! let layout = generate(&graph, &space, &config);
-//! assert!(layout.score > 0.0);
+//! assert!(layout.score.composite > 0.0);
 //! ```
 
 mod generate;
@@ -56,4 +56,5 @@ pub use generate::generate;
 pub use graph::{Edge, Graph, Node, OgunConfig, Rect, Space};
 pub use grid::Grid;
 pub use layout::Layout;
+pub use scoring::ScoreBreakdown;
 pub use types::{EdgeId, NodeId, Pos};

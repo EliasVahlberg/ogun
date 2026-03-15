@@ -16,7 +16,7 @@ routes paths through uncharted space.
 
 ```toml
 [dependencies]
-ogun = "0.1"
+ogun = "0.2"
 ```
 
 ## Example
@@ -40,7 +40,7 @@ let space = Space { width: 20, height: 20, obstacles: vec![] };
 let config = OgunConfig { seed: 42, ..OgunConfig::default() };
 
 let layout = generate(&graph, &space, &config);
-assert!(layout.score > 0.0);
+assert!(layout.score.composite > 0.0);
 ```
 
 ## Algorithm
@@ -50,7 +50,7 @@ for each agent in arrival order:
     1. EVAL  — score every grid position via potential Φ
     2. CHOOSE — Boltzmann sample: P(p) ∝ exp(β · Φ(p))
     3. COMMIT — place irrevocably, block footprint
-    4. ROUTE  — BFS (Lee) to already-placed neighbors
+    4. ROUTE  — negotiated Dijkstra to already-placed neighbors
 score the completed layout
 ```
 

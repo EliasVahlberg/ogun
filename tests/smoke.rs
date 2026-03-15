@@ -122,9 +122,9 @@ fn score_in_range() {
 
     let layout = generate(&graph, &space, &config);
     assert!(
-        layout.score >= 0.0 && layout.score <= 1.0,
+        layout.score.composite >= 0.0 && layout.score.composite <= 1.0,
         "score={}",
-        layout.score
+        layout.score.composite
     );
 }
 

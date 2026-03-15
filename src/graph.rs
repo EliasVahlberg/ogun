@@ -1,5 +1,7 @@
 //! Input types: the graph to lay out, the spatial domain, and algorithm config.
 
+use std::collections::HashMap;
+
 use crate::types::{EdgeId, NodeId, Pos};
 use serde::{Deserialize, Serialize};
 
@@ -93,6 +95,24 @@ pub struct OgunConfig {
     pub seed: u64,
     /// Repulsion strength between all node pairs.
     pub repulsion_k: f32,
+    /// Per-node-pair repulsion multipliers. Pairs not present default to 1.0.
+    /// Symmetric: `(a, b)` and `(b, a)` are equivalent.
+    #[serde(default)]
+    pub repulsion_pairs: HashMap<(NodeId, NodeId), f32>,
+    /// Number of rip-up-and-reroute iterations after initial placement.
+    /// 0 disables negotiation (Lee BFS only). Default: 3.
+    #[serde(default = "default_negotiation_iterations")]
+    pub negotiation_iterations: u32,
+    /// History cost increment for congested cells per iteration.
+    #[serde(default = "default_history_increment")]
+    pub history_increment: f32,
+}
+
+fn default_negotiation_iterations() -> u32 {
+    3
+}
+fn default_history_increment() -> f32 {
+    1.0
 }
 
 impl Default for OgunConfig {
@@ -101,6 +121,9 @@ impl Default for OgunConfig {
             beta: 2.0,
             seed: 0,
             repulsion_k: 50.0,
+            repulsion_pairs: HashMap::new(),
+            negotiation_iterations: 3,
+            history_increment: 1.0,
         }
     }
 }

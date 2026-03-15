@@ -84,7 +84,7 @@ fn run_perf(label: &str, graph: &Graph, space: &Space, config: &OgunConfig) {
     println!(
         "{label:30} | {elapsed:>10.2?} | placed {placed:>4}/{:>4} | routed {routed:>4}/{total_edges:>4} | score {:.3}",
         graph.nodes.len(),
-        layout.score,
+        layout.score.composite,
     );
 }
 
@@ -98,6 +98,7 @@ fn perf_medium_50n_100x100() {
         beta: 2.0,
         seed: 42,
         repulsion_k: 50.0,
+        ..Default::default()
     };
     run_perf("medium 50n 100x100 β=2", &graph, &space, &config);
 }
@@ -112,6 +113,7 @@ fn perf_large_200n_250x250() {
         beta: 2.0,
         seed: 42,
         repulsion_k: 50.0,
+        ..Default::default()
     };
     run_perf("large 200n 250x250 β=2", &graph, &space, &config);
 }
@@ -126,6 +128,7 @@ fn perf_saltglass_100n_250x110() {
         beta: 2.0,
         seed: 42,
         repulsion_k: 50.0,
+        ..Default::default()
     };
     run_perf("saltglass 100n 250x110 β=2", &graph, &space, &config);
 }
@@ -140,6 +143,7 @@ fn perf_stress_500n_500x500() {
         beta: 2.0,
         seed: 42,
         repulsion_k: 50.0,
+        ..Default::default()
     };
     run_perf("stress 500n 500x500 β=2", &graph, &space, &config);
 }
@@ -156,6 +160,7 @@ fn perf_beta_sweep() {
             beta,
             seed: 42,
             repulsion_k: 50.0,
+            ..Default::default()
         };
         run_perf(
             &format!("beta_sweep 100n 200x200 β={beta}"),
@@ -176,6 +181,7 @@ fn perf_dense_100n_6edges() {
         beta: 2.0,
         seed: 42,
         repulsion_k: 50.0,
+        ..Default::default()
     };
     run_perf("dense 100n 6e/n 200x200", &graph, &space, &config);
 }
@@ -190,6 +196,7 @@ fn perf_obstacle_heavy() {
         beta: 2.0,
         seed: 42,
         repulsion_k: 50.0,
+        ..Default::default()
     };
     run_perf("obstacle-heavy 100n 200x200", &graph, &space, &config);
 }

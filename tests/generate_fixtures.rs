@@ -56,6 +56,7 @@ fn scenarios() -> Vec<(String, String, Graph, Space, OgunConfig)> {
                 beta: 2.0,
                 seed: 42,
                 repulsion_k: 50.0,
+                ..Default::default()
             },
         ),
         (
@@ -132,6 +133,7 @@ fn scenarios() -> Vec<(String, String, Graph, Space, OgunConfig)> {
                 beta: 2.0,
                 seed: 100,
                 repulsion_k: 50.0,
+                ..Default::default()
             },
         ),
         (
@@ -184,6 +186,7 @@ fn scenarios() -> Vec<(String, String, Graph, Space, OgunConfig)> {
                 beta: 3.0,
                 seed: 77,
                 repulsion_k: 50.0,
+                ..Default::default()
             },
         ),
         (
@@ -214,6 +217,7 @@ fn scenarios() -> Vec<(String, String, Graph, Space, OgunConfig)> {
                 beta: 2.0,
                 seed: 55,
                 repulsion_k: 30.0,
+                ..Default::default()
             },
         ),
         (
@@ -274,6 +278,7 @@ fn scenarios() -> Vec<(String, String, Graph, Space, OgunConfig)> {
                 beta: 10.0,
                 seed: 42,
                 repulsion_k: 50.0,
+                ..Default::default()
             },
         ),
         (
@@ -334,6 +339,7 @@ fn scenarios() -> Vec<(String, String, Graph, Space, OgunConfig)> {
                 beta: 0.1,
                 seed: 42,
                 repulsion_k: 50.0,
+                ..Default::default()
             },
         ),
     ]
