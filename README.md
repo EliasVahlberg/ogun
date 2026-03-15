@@ -81,6 +81,13 @@ You can run the benchmarks with:
 $ cargo test --release --test perf -- --ignored --nocapture
 ```
 
+## Paper
+
+The algorithm is described in detail in [docs/paper/ogun_paper.pdf](docs/paper/ogun_paper.pdf):
+
+> Elias Vahlberg. *Ogun: Spatial Layout Generation via Sequential Logit Dynamics
+> on Potential Games.* March 2026.
+
 ## License
 
 MIT

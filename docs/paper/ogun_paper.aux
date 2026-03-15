@@ -1,0 +1,53 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{mcmurchie1995}
+\citation{blume1993}
+\citation{mcmurchie1995}
+\providecommand \oddpage@label [2]{}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Problem Formulation}{2}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Definitions}{2}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Output}{2}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Objective}{2}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Algorithm Overview}{2}{section.3}\protected@file@percent }
+\@writefile{loa}{\contentsline {algocf}{\numberline {1}{\ignorespaces Ogun: Sequential Logit Dynamics with Negotiated Routing}}{3}{algocf.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Potential Function}{3}{section.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Forces acting on a candidate position $p$ for a new node $v_i$. Blue arrows show attraction toward connected, already-placed neighbors ($v_1$, $v_2$). Red arrows show repulsion pushing $p$ away from all placed nodes. If $p$ falls within the overlap zone of any placed node (dashed circle around $v_3$), the position is rejected.}}{3}{figure.1}\protected@file@percent }
+\newlabel{fig:potential}{{1}{3}{Forces acting on a candidate position $p$ for a new node $v_i$. Blue arrows show attraction toward connected, already-placed neighbors ($v_1$, $v_2$). Red arrows show repulsion pushing $p$ away from all placed nodes. If $p$ falls within the overlap zone of any placed node (dashed circle around $v_3$), the position is rejected}{figure.1}{}}
+\citation{mcmurchie1995}
+\@writefile{toc}{\contentsline {paragraph}{Overlap rejection.}{4}{section*.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Repulsion cutoff.}{4}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Boundary affinity.}{4}{section*.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Cell bonus.}{4}{section*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Boltzmann Sampling}{4}{section.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Effect of inverse temperature $\beta $ on position selection probability for eight candidate positions with varying utility. At low $\beta $, the distribution is nearly uniform (exploratory). At high $\beta $, probability concentrates on the highest-utility position $p_5$ (greedy). Intermediate $\beta $ balances exploration and exploitation.}}{4}{figure.2}\protected@file@percent }
+\newlabel{fig:boltzmann}{{2}{4}{Effect of inverse temperature $\beta $ on position selection probability for eight candidate positions with varying utility. At low $\beta $, the distribution is nearly uniform (exploratory). At high $\beta $, probability concentrates on the highest-utility position $p_5$ (greedy). Intermediate $\beta $ balances exploration and exploitation}{figure.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Routing}{4}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Phase 1: Congestion-Aware Dijkstra}{4}{subsection.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Phase 2: PathFinder Negotiation}{5}{subsection.6.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces PathFinder negotiation resolving a routing conflict. (a)~Two routes (blue: A$\to $B, red: C$\to $D) share a cell ($s=2$). (b)~The shared cell receives a history penalty $h + \delta $, increasing its cost. (c)~On the next iteration, the lower-weight route (red) detours around the now-expensive cell, eliminating the conflict.}}{5}{figure.3}\protected@file@percent }
+\newlabel{fig:pathfinder}{{3}{5}{PathFinder negotiation resolving a routing conflict. (a)~Two routes (blue: A$\to $B, red: C$\to $D) share a cell ($s=2$). (b)~The shared cell receives a history penalty $h + \delta $, increasing its cost. (c)~On the next iteration, the lower-weight route (red) detours around the now-expensive cell, eliminating the conflict}{figure.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Scoring}{5}{section.7}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Scoring metrics. Each is in $[0, 1]$; the composite is their mean.}}{5}{table.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {8}Implementation}{5}{section.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Struct-of-arrays (SoA) layout.}{6}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Parallel evaluation.}{6}{section*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Buffer reuse.}{6}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Determinism.}{6}{section*.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.1}Benchmarks}{6}{subsection.8.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Release-mode benchmarks. Naive baseline uses AoS layout, no cutoff, no parallelism, no buffer reuse.}}{6}{table.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {9}Application: Procedural City Generation}{6}{section.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {10}Complexity Analysis}{6}{section.10}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Asymptotic complexity. $A = W \times H$ is the grid area.}}{6}{table.3}\protected@file@percent }
+\bibcite{blume1993}{1}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces A procedural city layout generated by Oku using the Ogun algorithm. Colored rectangles represent buildings of different types; gray paths are routed roads. The layout exhibits emergent clustering and road hierarchy from the potential function and negotiation routing.}}{7}{figure.4}\protected@file@percent }
+\newlabel{fig:city}{{4}{7}{A procedural city layout generated by Oku using the Ogun algorithm. Colored rectangles represent buildings of different types; gray paths are routed roads. The layout exhibits emergent clustering and road hierarchy from the potential function and negotiation routing}{figure.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {11}Conclusion}{7}{section.11}\protected@file@percent }
+\bibcite{mcmurchie1995}{2}
+\bibcite{monderer1996}{3}
+\bibcite{lee1961}{4}
+\bibcite{togelius2011}{5}
+\bibcite{shaker2016}{6}
+\gdef \@abspage@last{8}
