@@ -33,11 +33,11 @@ fn scenarios() -> Vec<(String, String, Graph, Space, OgunConfig)> {
                 nodes: vec![
                     Node {
                         id: NodeId(0),
-                        radius: 1,
+                        width: 3, height: 3, fixed: None,
                     },
                     Node {
                         id: NodeId(1),
-                        radius: 1,
+                        width: 3, height: 3, fixed: None,
                     },
                 ],
                 edges: vec![Edge {
@@ -67,23 +67,23 @@ fn scenarios() -> Vec<(String, String, Graph, Space, OgunConfig)> {
                 nodes: vec![
                     Node {
                         id: NodeId(0),
-                        radius: 1,
+                        width: 3, height: 3, fixed: None,
                     },
                     Node {
                         id: NodeId(1),
-                        radius: 1,
+                        width: 3, height: 3, fixed: None,
                     },
                     Node {
                         id: NodeId(2),
-                        radius: 1,
+                        width: 3, height: 3, fixed: None,
                     },
                     Node {
                         id: NodeId(3),
-                        radius: 1,
+                        width: 3, height: 3, fixed: None,
                     },
                     Node {
                         id: NodeId(4),
-                        radius: 2,
+                        width: 5, height: 5, fixed: None,
                     },
                 ],
                 edges: vec![
@@ -146,15 +146,15 @@ fn scenarios() -> Vec<(String, String, Graph, Space, OgunConfig)> {
                 nodes: vec![
                     Node {
                         id: NodeId(0),
-                        radius: 1,
+                        width: 3, height: 3, fixed: None,
                     },
                     Node {
                         id: NodeId(1),
-                        radius: 1,
+                        width: 3, height: 3, fixed: None,
                     },
                     Node {
                         id: NodeId(2),
-                        radius: 1,
+                        width: 3, height: 3, fixed: None,
                     },
                 ],
                 edges: vec![
@@ -199,7 +199,7 @@ fn scenarios() -> Vec<(String, String, Graph, Space, OgunConfig)> {
                 nodes: (0..6)
                     .map(|i| Node {
                         id: NodeId(i),
-                        radius: 1,
+                        width: 3, height: 3, fixed: None,
                     })
                     .collect(),
                 edges: (0..5)
@@ -231,19 +231,19 @@ fn scenarios() -> Vec<(String, String, Graph, Space, OgunConfig)> {
                 nodes: vec![
                     Node {
                         id: NodeId(0),
-                        radius: 1,
+                        width: 3, height: 3, fixed: None,
                     },
                     Node {
                         id: NodeId(1),
-                        radius: 1,
+                        width: 3, height: 3, fixed: None,
                     },
                     Node {
                         id: NodeId(2),
-                        radius: 1,
+                        width: 3, height: 3, fixed: None,
                     },
                     Node {
                         id: NodeId(3),
-                        radius: 1,
+                        width: 3, height: 3, fixed: None,
                     },
                 ],
                 edges: vec![
@@ -293,19 +293,19 @@ fn scenarios() -> Vec<(String, String, Graph, Space, OgunConfig)> {
                 nodes: vec![
                     Node {
                         id: NodeId(0),
-                        radius: 1,
+                        width: 3, height: 3, fixed: None,
                     },
                     Node {
                         id: NodeId(1),
-                        radius: 1,
+                        width: 3, height: 3, fixed: None,
                     },
                     Node {
                         id: NodeId(2),
-                        radius: 1,
+                        width: 3, height: 3, fixed: None,
                     },
                     Node {
                         id: NodeId(3),
-                        radius: 1,
+                        width: 3, height: 3, fixed: None,
                     },
                 ],
                 edges: vec![

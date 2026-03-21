@@ -15,7 +15,8 @@ use crate::types::{NodeId, Pos};
 pub struct PlacedSoa {
     pub xs: Vec<f32>,
     pub ys: Vec<f32>,
-    pub radii: Vec<f32>,
+    pub half_ws: Vec<f32>,
+    pub half_hs: Vec<f32>,
     pub count: usize,
 }
 
@@ -24,15 +25,17 @@ impl PlacedSoa {
         Self {
             xs: Vec::with_capacity(capacity),
             ys: Vec::with_capacity(capacity),
-            radii: Vec::with_capacity(capacity),
+            half_ws: Vec::with_capacity(capacity),
+            half_hs: Vec::with_capacity(capacity),
             count: 0,
         }
     }
 
-    pub fn push(&mut self, pos: Pos, radius: u32) {
+    pub fn push(&mut self, pos: Pos, width: u32, height: u32) {
         self.xs.push(pos.x as f32);
         self.ys.push(pos.y as f32);
-        self.radii.push(radius as f32);
+        self.half_ws.push(width as f32 / 2.0);
+        self.half_hs.push(height as f32 / 2.0);
         self.count += 1;
     }
 }
@@ -45,7 +48,8 @@ impl PlacedSoa {
 pub fn utility(
     pos: Pos,
     node_id: NodeId,
-    node_radius: f32,
+    node_half_w: f32,
+    node_half_h: f32,
     placed: &PlacedSoa,
     adj: &[(NodeId, f32)],
     positions: &[Option<Pos>],
@@ -72,15 +76,16 @@ pub fn utility(
     for j in 0..placed.count {
         let dx = px - placed.xs[j];
         let dy = py - placed.ys[j];
-        let dist_sq = dx * dx + dy * dy;
 
-        // Overlap rejection
-        let min_dist = node_radius + placed.radii[j];
-        if dist_sq < min_dist * min_dist {
+        // Rectangular overlap rejection
+        if dx.abs() < node_half_w + placed.half_ws[j]
+            && dy.abs() < node_half_h + placed.half_hs[j]
+        {
             return None;
         }
 
-        // Repulsion (skip negligible distant contributions)
+        // Repulsion (centroid-to-centroid, skip negligible distant contributions)
+        let dist_sq = dx * dx + dy * dy;
         if dist_sq < cutoff_sq {
             score += config.repulsion_k * repulsion_mults[j] / dist_sq.max(1.0);
         }

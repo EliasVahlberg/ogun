@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-03-21
+
+### Changed
+
+- **Breaking:** `Node.radius: u32` replaced with `Node.width: u32` and
+  `Node.height: u32` for rectangular footprints. Overlap detection is now
+  axis-aligned rectangle intersection; repulsion remains centroid-to-centroid.
+  Migration: `radius: r` → `width: 2*r+1, height: 2*r+1` for equivalent
+  square footprints.
+
+### Added
+
+- `Node.fixed: Option<Pos>` — pre-placed nodes skip EVAL/CHOOSE and are
+  committed before the sequential placement loop. Edges between fixed nodes
+  are routed during pre-commit. In game-theoretic terms, a fixed node is a
+  degenerate agent whose strategy is deterministic (β → ∞, single candidate).
+- Expanded `Space::routing_costs` documentation: `None` = 1.0, `0.0` = free,
+  `1.0` = normal, `>1.0` = expensive, very high values effectively block
+  routing.
+
 ## [0.3.0] - 2026-03-15
 
 ### Added
@@ -65,6 +85,7 @@ Initial release.
 - Rayon parallel utility evaluation (adaptive threshold)
 - Serde serialization for all public types
 
+[0.4.0]: https://github.com/EliasVahlberg/ogun/releases/tag/v0.4.0
 [0.3.0]: https://github.com/EliasVahlberg/ogun/releases/tag/v0.3.0
 [0.2.0]: https://github.com/EliasVahlberg/ogun/releases/tag/v0.2.0
 [0.1.0]: https://github.com/EliasVahlberg/ogun/releases/tag/v0.1.0

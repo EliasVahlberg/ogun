@@ -102,10 +102,64 @@ pub fn generate(graph: &Graph, space: &Space, config: &OgunConfig) -> Layout {
     }
     let mut placed_node_ids: Vec<usize> = Vec::with_capacity(n);
 
+    // --- PRE-COMMIT: place fixed nodes before the sequential loop ---
+    for node in &graph.nodes {
+        let Some(fixed_pos) = node.fixed else {
+            continue;
+        };
+        let nid = node.id.0 as usize;
+        positions[nid] = Some(fixed_pos);
+        placed_soa.push(fixed_pos, node.width, node.height);
+        placed_node_ids.push(nid);
+        mark_footprint(&mut blocked, w, fixed_pos, node.width, node.height);
+    }
+
+    // Route edges between pairs of fixed nodes.
+    for e in &graph.edges {
+        let si = e.src.0 as usize;
+        let di = e.dst.0 as usize;
+        if graph.nodes[si].fixed.is_none() || graph.nodes[di].fixed.is_none() {
+            continue;
+        }
+        let src = positions[si].unwrap();
+        let dst = positions[di].unwrap();
+        let src_hw = graph.nodes[si].width as f32 / 2.0;
+        let src_hh = graph.nodes[si].height as f32 / 2.0;
+        let dst_hw = graph.nodes[di].width as f32 / 2.0;
+        let dst_hh = graph.nodes[di].height as f32 / 2.0;
+
+        let passable = |p: Pos| {
+            let i = (p.y * w + p.x) as usize;
+            if !blocked[i] {
+                return true;
+            }
+            let in_src = in_footprint(p, src, src_hw, src_hh);
+            let in_dst = in_footprint(p, dst, dst_hw, dst_hh);
+            in_src || in_dst
+        };
+
+        if let Some((path, cost)) = negotiate_route(
+            w, h, src, dst, passable, &congestion, &mut dijk_buf, rc_slice,
+        ) {
+            for &p in &path {
+                blocked[(p.y * w + p.x) as usize] = true;
+            }
+            congestion.add_path(&path);
+            route_costs.insert(e.id, cost);
+            paths.insert(e.id, path);
+        }
+    }
+
     // --- PHASE 1: sequential placement with congestion-aware routing ---
     for node in &graph.nodes {
+        // Skip fixed nodes (already committed).
+        if node.fixed.is_some() {
+            continue;
+        }
+
         let nid = node.id.0 as usize;
-        let node_radius = node.radius as f32;
+        let node_half_w = node.width as f32 / 2.0;
+        let node_half_h = node.height as f32 / 2.0;
 
         // EVAL_UTILITY
         let node_adj = &node_adjs[nid];
@@ -126,7 +180,8 @@ pub fn generate(graph: &Graph, space: &Space, config: &OgunConfig) -> Layout {
                         utility(
                             pos,
                             node.id,
-                            node_radius,
+                            node_half_w,
+                            node_half_h,
                             placed_ref,
                             node_adj,
                             positions_ref,
@@ -147,7 +202,8 @@ pub fn generate(graph: &Graph, space: &Space, config: &OgunConfig) -> Layout {
                     if let Some(u) = utility(
                         pos,
                         node.id,
-                        node_radius,
+                        node_half_w,
+                        node_half_h,
                         placed_ref,
                         node_adj,
                         positions_ref,
@@ -173,9 +229,9 @@ pub fn generate(graph: &Graph, space: &Space, config: &OgunConfig) -> Layout {
 
         // COMMIT_IRREVOCABLE
         positions[nid] = Some(chosen);
-        placed_soa.push(chosen, node.radius);
+        placed_soa.push(chosen, node.width, node.height);
         placed_node_ids.push(nid);
-        mark_footprint(&mut blocked, w, chosen, node.radius);
+        mark_footprint(&mut blocked, w, chosen, node.width, node.height);
 
         // ROUTE_NEGOTIATED: connect to already-placed neighbors.
         for &(edge_id, neighbor_id, _) in &adj[nid] {
@@ -184,16 +240,18 @@ pub fn generate(graph: &Graph, space: &Space, config: &OgunConfig) -> Layout {
             }
             let src = chosen;
             let dst = positions[neighbor_id.0 as usize].unwrap();
-            let src_r = node.radius as f32;
-            let dst_r = graph.nodes[neighbor_id.0 as usize].radius as f32;
+            let src_hw = node.width as f32 / 2.0;
+            let src_hh = node.height as f32 / 2.0;
+            let dst_hw = graph.nodes[neighbor_id.0 as usize].width as f32 / 2.0;
+            let dst_hh = graph.nodes[neighbor_id.0 as usize].height as f32 / 2.0;
 
             let passable = |p: Pos| {
                 let i = (p.y * w + p.x) as usize;
                 if !blocked[i] {
                     return true;
                 }
-                let in_src = p.dist_sq(src) <= src_r * src_r;
-                let in_dst = p.dist_sq(dst) <= dst_r * dst_r;
+                let in_src = in_footprint(p, src, src_hw, src_hh);
+                let in_dst = in_footprint(p, dst, dst_hw, dst_hh);
                 in_src || in_dst
             };
 
@@ -222,25 +280,42 @@ pub fn generate(graph: &Graph, space: &Space, config: &OgunConfig) -> Layout {
     // --- PHASE 2: rip-up and reroute ---
     if config.negotiation_iterations > 0 && !paths.is_empty() {
         // Collect edge info for rerouting, sorted by weight descending.
-        let mut edge_info: Vec<(EdgeId, Pos, Pos, f32, f32, f32)> = graph
+        struct EdgeInfo {
+            eid: EdgeId,
+            src: Pos,
+            dst: Pos,
+            weight: f32,
+            src_hw: f32,
+            src_hh: f32,
+            dst_hw: f32,
+            dst_hh: f32,
+        }
+        let mut edge_info: Vec<EdgeInfo> = graph
             .edges
             .iter()
             .filter_map(|e| {
                 let src_pos = positions[e.src.0 as usize]?;
                 let dst_pos = positions[e.dst.0 as usize]?;
-                let src_r = graph.nodes[e.src.0 as usize].radius as f32;
-                let dst_r = graph.nodes[e.dst.0 as usize].radius as f32;
-                Some((e.id, src_pos, dst_pos, e.weight, src_r, dst_r))
+                Some(EdgeInfo {
+                    eid: e.id,
+                    src: src_pos,
+                    dst: dst_pos,
+                    weight: e.weight,
+                    src_hw: graph.nodes[e.src.0 as usize].width as f32 / 2.0,
+                    src_hh: graph.nodes[e.src.0 as usize].height as f32 / 2.0,
+                    dst_hw: graph.nodes[e.dst.0 as usize].width as f32 / 2.0,
+                    dst_hh: graph.nodes[e.dst.0 as usize].height as f32 / 2.0,
+                })
             })
             .collect();
-        edge_info.sort_by(|a, b| b.3.partial_cmp(&a.3).unwrap_or(std::cmp::Ordering::Equal));
+        edge_info.sort_by(|a, b| b.weight.partial_cmp(&a.weight).unwrap_or(std::cmp::Ordering::Equal));
 
         for _ in 0..config.negotiation_iterations {
             let mut any_conflict = false;
 
-            for &(eid, src, dst, _weight, src_r, dst_r) in &edge_info {
+            for ei in &edge_info {
                 // Rip up
-                if let Some(old_path) = paths.get(&eid) {
+                if let Some(old_path) = paths.get(&ei.eid) {
                     congestion.remove_path(old_path);
                 }
 
@@ -249,8 +324,8 @@ pub fn generate(graph: &Graph, space: &Space, config: &OgunConfig) -> Layout {
                     if !blocked[i] {
                         return true;
                     }
-                    let in_src = p.dist_sq(src) <= src_r * src_r;
-                    let in_dst = p.dist_sq(dst) <= dst_r * dst_r;
+                    let in_src = in_footprint(p, ei.src, ei.src_hw, ei.src_hh);
+                    let in_dst = in_footprint(p, ei.dst, ei.dst_hw, ei.dst_hh);
                     in_src || in_dst
                 };
 
@@ -258,17 +333,17 @@ pub fn generate(graph: &Graph, space: &Space, config: &OgunConfig) -> Layout {
                 if let Some((new_path, cost)) = negotiate_route(
                     w,
                     h,
-                    src,
-                    dst,
+                    ei.src,
+                    ei.dst,
                     passable,
                     &congestion,
                     &mut dijk_buf,
                     rc_slice,
                 ) {
                     congestion.add_path(&new_path);
-                    paths.insert(eid, new_path);
-                    route_costs.insert(eid, cost);
-                } else if let Some(old_path) = paths.get(&eid) {
+                    paths.insert(ei.eid, new_path);
+                    route_costs.insert(ei.eid, cost);
+                } else if let Some(old_path) = paths.get(&ei.eid) {
                     // Couldn't reroute — restore
                     congestion.add_path(old_path);
                 }
@@ -343,19 +418,26 @@ pub fn generate(graph: &Graph, space: &Space, config: &OgunConfig) -> Layout {
     }
 }
 
-/// Block grid cells within a node's footprint (square approximation).
-fn mark_footprint(blocked: &mut [bool], w: u32, center: Pos, radius: u32) {
-    let r = radius as i32;
-    for dy in -r..=r {
-        for dx in -r..=r {
-            let nx = center.x as i32 + dx;
-            let ny = center.y as i32 + dy;
-            if nx >= 0 && ny >= 0 && (nx as u32) < w {
-                let idx = ny as u32 * w + nx as u32;
-                if (idx as usize) < blocked.len() {
-                    blocked[idx as usize] = true;
-                }
-            }
+/// True if `p` is within the rectangular footprint centered at `center`.
+#[inline]
+fn in_footprint(p: Pos, center: Pos, half_w: f32, half_h: f32) -> bool {
+    (p.x as f32 - center.x as f32).abs() < half_w
+        && (p.y as f32 - center.y as f32).abs() < half_h
+}
+
+/// Block grid cells within a node's rectangular footprint.
+fn mark_footprint(blocked: &mut [bool], grid_w: u32, center: Pos, width: u32, height: u32) {
+    let left = (width.saturating_sub(1)) / 2;
+    let right = width / 2;
+    let top = (height.saturating_sub(1)) / 2;
+    let bottom = height / 2;
+    let x0 = center.x.saturating_sub(left);
+    let x1 = (center.x + right).min(grid_w - 1);
+    let y0 = center.y.saturating_sub(top);
+    let y1 = (center.y + bottom).min((blocked.len() as u32 / grid_w).saturating_sub(1));
+    for y in y0..=y1 {
+        for x in x0..=x1 {
+            blocked[(y * grid_w + x) as usize] = true;
         }
     }
 }

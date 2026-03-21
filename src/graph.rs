@@ -10,8 +10,16 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Node {
     pub id: NodeId,
-    /// Footprint radius in grid cells (simplified to a circle).
-    pub radius: u32,
+    /// Footprint width in grid cells.
+    pub width: u32,
+    /// Footprint height in grid cells.
+    pub height: u32,
+    /// If set, this node is pre-placed at the given position and skips
+    /// EVAL/CHOOSE. It is committed before the sequential placement loop
+    /// and still participates in ROUTE. In game-theoretic terms, a fixed
+    /// node is a degenerate agent whose strategy is deterministic.
+    #[serde(default)]
+    pub fixed: Option<Pos>,
 }
 
 /// A weighted edge connecting two nodes.
@@ -77,8 +85,15 @@ pub struct Space {
     pub width: u32,
     pub height: u32,
     pub obstacles: Vec<Rect>,
-    /// Per-cell routing cost multiplier. Default (None) = uniform cost 1.0.
-    /// Values > 1.0 make routing more expensive. 0.0 = free (preferred corridor).
+    /// Per-cell routing cost multiplier. `None` means uniform cost 1.0.
+    ///
+    /// - `0.0` — free (preferred corridor, e.g. existing road)
+    /// - `1.0` — normal traversal cost
+    /// - `>1.0` — expensive (e.g. rough terrain, walls)
+    /// - Very high values (e.g. `1e6`) effectively block routing without
+    ///   requiring an explicit obstacle rectangle
+    ///
+    /// Dimensions must match `width × height` if provided.
     #[serde(default)]
     pub routing_costs: Option<Grid<f32>>,
 }

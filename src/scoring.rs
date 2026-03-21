@@ -133,15 +133,18 @@ fn void_ratio(
     // Count occupied cells (node footprints + path cells).
     let mut occupied: Grid<bool> = Grid::new(space.width, space.height, false);
     for (&node_id, &pos) in positions {
-        let r = graph.nodes[node_id.0 as usize].radius;
-        let r_i32 = r as i32;
-        for dy in -r_i32..=r_i32 {
-            for dx in -r_i32..=r_i32 {
-                let nx = pos.x as i32 + dx;
-                let ny = pos.y as i32 + dy;
-                if nx >= 0 && ny >= 0 {
-                    occupied.set(nx as u32, ny as u32, true);
-                }
+        let node = &graph.nodes[node_id.0 as usize];
+        let left = (node.width.saturating_sub(1)) / 2;
+        let right = node.width / 2;
+        let top = (node.height.saturating_sub(1)) / 2;
+        let bottom = node.height / 2;
+        let x0 = pos.x.saturating_sub(left);
+        let x1 = (pos.x + right).min(space.width - 1);
+        let y0 = pos.y.saturating_sub(top);
+        let y1 = (pos.y + bottom).min(space.height - 1);
+        for y in y0..=y1 {
+            for x in x0..=x1 {
+                occupied.set(x, y, true);
             }
         }
     }

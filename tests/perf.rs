@@ -23,9 +23,14 @@ fn build_scenario(
     let mut rng = ChaCha8Rng::seed_from_u64(seed);
 
     let nodes: Vec<Node> = (0..n)
-        .map(|i| Node {
-            id: NodeId(i),
-            radius: rng.random_range(1..=2),
+        .map(|i| {
+            let r = rng.random_range(1..=2u32);
+            Node {
+                id: NodeId(i),
+                width: 2 * r + 1,
+                height: 2 * r + 1,
+                fixed: None,
+            }
         })
         .collect();
 

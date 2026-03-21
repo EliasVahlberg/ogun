@@ -6,19 +6,19 @@ fn test_graph() -> Graph {
         nodes: vec![
             Node {
                 id: NodeId(0),
-                radius: 1,
+                width: 3, height: 3, fixed: None,
             },
             Node {
                 id: NodeId(1),
-                radius: 1,
+                width: 3, height: 3, fixed: None,
             },
             Node {
                 id: NodeId(2),
-                radius: 1,
+                width: 3, height: 3, fixed: None,
             },
             Node {
                 id: NodeId(3),
-                radius: 1,
+                width: 3, height: 3, fixed: None,
             },
         ],
         edges: vec![
@@ -153,11 +153,11 @@ fn obstacles_respected() {
         nodes: vec![
             Node {
                 id: NodeId(0),
-                radius: 0,
+                width: 1, height: 1, fixed: None,
             },
             Node {
                 id: NodeId(1),
-                radius: 0,
+                width: 1, height: 1, fixed: None,
             },
         ],
         edges: vec![],

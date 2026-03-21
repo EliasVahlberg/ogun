@@ -16,7 +16,7 @@ routes paths through uncharted space.
 
 ```toml
 [dependencies]
-ogun = "0.3"
+ogun = "0.4"
 ```
 
 ## Example
@@ -26,8 +26,8 @@ use ogun::*;
 
 let graph = Graph {
     nodes: vec![
-        Node { id: NodeId(0), radius: 1 },
-        Node { id: NodeId(1), radius: 1 },
+        Node { id: NodeId(0), width: 3, height: 3, fixed: None },
+        Node { id: NodeId(1), width: 3, height: 3, fixed: None },
     ],
     edges: vec![Edge {
         id: EdgeId(0),
